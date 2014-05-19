@@ -31,8 +31,6 @@ int write_arg1(struct file *file, const char *buf, unsigned long count, void *da
 	if(count > WRITE_SIZE) {
     	count = WRITE_SIZE;
 	}
-
-	//memset(arg1_input, 0, WRITE_SIZE);
 	memcpy(arg1_input, buf, count);
 	return count;
 }
@@ -45,8 +43,6 @@ int write_arg2(struct file *file, const char *buf, unsigned long count, void *da
 	if(count > WRITE_SIZE) {
     	count = WRITE_SIZE;
 	}
-
-	//memset(arg2_input, 0, WRITE_SIZE);
 	memcpy(arg2_input, buf, count);
 	return count;
 }
@@ -78,7 +74,7 @@ int read_result(char *buffer, char **buffer_location,
 	if (arg1_input[strlen(arg1_input) - 2] == '\n') {
 		arg1_input[strlen(arg1_input) - 2] = (char)0;
 	}
-
+	//kstrtol — конвертирует string в long
 	kstrtol(arg1_input, 10, &a1);
 	kstrtol(arg2_input, 10, &a2);
 
@@ -98,6 +94,7 @@ int read_result(char *buffer, char **buffer_location,
 int init_module()
 {
 	// parent dir
+	//значение NULL если файл находится непосредственно в каталоге /proc
 	calc_dir = proc_mkdir(PARENT_DIR, NULL);
 	if(!calc_dir) {
 		printk(KERN_INFO "Error creating proc entry");
@@ -105,11 +102,15 @@ int init_module()
 	}
 
 	// arg1
+	// 0666 - права доступа для файлов
+	// 0666 - 0022 = 0644 (что соответствует правам -rw-r--r-- для file)
+	// С помощью команды create_proc_entry() в указанной выше поддиректории создается обычный файл "ARG1" с правами доступа 0666.
 	arg1 = create_proc_entry(ARG1, 0666, calc_dir);
 	if(!arg1) {
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
     }
+	//запись данных в виртуальный файл (из пользовательского пространства в ядро)
 	arg1->write_proc = write_arg1;
 
 	// arg2
@@ -134,6 +135,7 @@ int init_module()
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
     }
+	//считывает данные из виртуального файла (из ядра в пользовательское пространство) 
 	result->read_proc = read_result;
 
 	printk(KERN_INFO "/proc/%s created\n", PARENT_DIR);
