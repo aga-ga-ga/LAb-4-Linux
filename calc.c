@@ -14,9 +14,11 @@
 
 #define PARENT_DIR "calc"
 
-int read_result(char *buffer, char **buffer_location,
-                  off_t offset, int buffer_length, int *eof, void *data)
-{
+static char arg1_input[WRITE_SIZE];
+static char arg2_input[WRITE_SIZE];
+static char operation_input[WRITE_SIZE];
+
+long calculate(void) {
 	long a1 = 0;
 	long a2 = 0;
 	long res = 0;
@@ -24,7 +26,7 @@ int read_result(char *buffer, char **buffer_location,
 	if (arg1_input[strlen(arg1_input) - 2] == '\n') {
 		arg1_input[strlen(arg1_input) - 2] = (char)0;
 	}
-	//kstrtol — конвертирует string в long
+	//string -> long
 	kstrtol(arg1_input, 10, &a1);
 	kstrtol(arg2_input, 10, &a2);
 
@@ -37,14 +39,8 @@ int read_result(char *buffer, char **buffer_location,
 	} else if (operation_input[0] == '/') {
 		res = a1 / a2;
 	}
-
-	return sprintf(buffer, "%ld\n", res);
+	return res;
 }
-
-static char arg1_input[WRITE_SIZE];
-static char arg2_input[WRITE_SIZE];
-static char operation_input[WRITE_SIZE];
-
 
 
 #ifdef SYSFS
@@ -209,6 +205,13 @@ int write_operation(struct file *file, const char *buf, unsigned long count, voi
 /*
  * result read handler
  */
+int read_result(char *buffer, char **buffer_location,
+				  off_t offset, int buffer_length, int *eof, void *data)
+{
+	long res = calculate();
+
+	return sprintf(buffer, "%ld\n", res);
+}
 
 
 int init_module()
