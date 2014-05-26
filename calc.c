@@ -109,7 +109,7 @@ int init_module()
 	if(!arg1) {
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
-    }
+    	}
 	//запись данных в виртуальный файл (из пользовательского пространства в ядро)
 	arg1->write_proc = write_arg1;
 
@@ -118,7 +118,7 @@ int init_module()
 	if(!arg2) {
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
-    }
+    	}
 	arg2->write_proc = write_arg2;
 
 	// operation
@@ -126,7 +126,7 @@ int init_module()
 	if(!operation) {
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
-    }
+    	}
 	operation->write_proc = write_operation;
 
 	// result
@@ -134,7 +134,7 @@ int init_module()
 	if(!result) {
     	printk(KERN_INFO "Error creating proc entry");
     	return -ENOMEM;
-    }
+	}
 	//считывает данные из виртуального файла (из ядра в пользовательское пространство) 
 	result->read_proc = read_result;
 
